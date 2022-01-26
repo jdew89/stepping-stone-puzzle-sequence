@@ -2,11 +2,12 @@ package main
 
 import "fmt"
 
+// Stores states of the board for iteration.
 type BoardState struct {
-	Board   Board
-	Y       int
-	X       int
-	NextNum int
+	Board   Board // Reference to the board
+	NextY   int   // Next Y position needing cheked
+	NextX   int   // Next X position needing cheked
+	NextNum int   // Next number to place
 }
 
 type Board [5][6]int
@@ -14,15 +15,12 @@ type Board [5][6]int
 func main() {
 	board := Board{}
 
+	//initialize 1's on the board
 	board[1][2] = 1
 	board[3][4] = 1
 
 	next_num := 2
 	boardStates := make([]BoardState, 0)
-
-	//board[2][3] = 2
-	//fmt.Println(SumNeighbors(&board, 2, 2))
-	//next_num = 3
 
 	tempState := BoardState{board, 0, 0, next_num}
 	boardStates = append(boardStates, tempState)
@@ -47,56 +45,51 @@ func main() {
 		i++
 	}
 
-	//PlayBoardState(&boardStates[1], &boardStates)
-
-	fmt.Println("====")
 	fmt.Println("Total Board States:", len(boardStates))
 	fmt.Println("Highest Num:", highest_num)
 	fmt.Println("Highest Board State")
 	PrintBoard(highestBoard)
-	//PrintBoard(&board)
-	//PrintBoard(&boardStates[2].Board)
 }
 
-//returns last placed num
+// Returns the last placed number and board configuration where it stopped.
 func PlayBoardState(boardState *BoardState, boardStateList *[]BoardState) (int, *Board) {
 	board := boardState.Board
-	//fmt.Println("X:", boardState.X, ", Y:", boardState.Y, "next_num:", boardState.NextNum)
+	//fmt.Println("X:", boardState.NextX, ", Y:", boardState.NextY, "next_num:", boardState.NextNum)
 
 	next_num := boardState.NextNum
 
 	placed_tile := false
 
-	//fmt.Println("STARTING STATE\nNext Num:", next_num, "(", boardState.Y, ",", boardState.X, ")")
+	//fmt.Println("STARTING STATE\nNext Num:", next_num, "(", boardState.NextY, ",", boardState.NextX, ")")
 	//PrintBoard(&board)
 
+	startingX := boardState.NextX
+	startingY := boardState.NextY
+
 	for next_num < 17 {
-		for y := boardState.Y; y < len(board) && !placed_tile; y++ {
-			for x := boardState.X; x < len(board[y]) && !placed_tile; x++ {
+		for y := startingY; y < len(board) && !placed_tile; y++ {
+			for x := startingX; x < len(board[y]) && !placed_tile; x++ {
 				if board[y][x] == 0 {
 					//skip tiles without 0
 					if SumNeighbors(&board, y, x) == next_num {
-
-						tempState := BoardState{board, y, x + 1, next_num}
-						*boardStateList = append(*boardStateList, tempState)
+						*boardStateList = append(*boardStateList, BoardState{board, y, x + 1, next_num})
 
 						board[y][x] = next_num
-						//fmt.Println("placed!", next_num)
 						next_num += 1
 						placed_tile = true
 					}
 				}
 			}
-			boardState.X = 0
+			//reset the x to 0 or it keeps searching from the wrong spot
+			startingX = 0
 		}
 
 		if !placed_tile {
 			break
 		}
 		placed_tile = false
-		//reset the x and y for state or it keep searching from the wrong stop
-		boardState.Y = 0
-		//fmt.Println(next_num)
+		//reset the y to 0 or it keeps searching from the wrong spot
+		startingY = 0
 	}
 	//fmt.Println("END\nNext Num:", next_num)
 	//PrintBoard(&board)
@@ -104,6 +97,8 @@ func PlayBoardState(boardState *BoardState, boardStateList *[]BoardState) (int, 
 
 }
 
+// Calcs the sum of a position on the board.
+// Looks at each of it's eight neighbors and sums them.
 func SumNeighbors(board *Board, y int, x int) int {
 	sum := 0
 
@@ -137,6 +132,7 @@ func SumNeighbors(board *Board, y int, x int) int {
 	return sum
 }
 
+// Prints 1 row of the board on each line
 func PrintBoard(board *Board) {
 	for y := 0; y < len(board); y++ {
 		fmt.Println(board[y])

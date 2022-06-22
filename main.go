@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // Stores states of the board for iteration.
 type BoardState struct {
@@ -10,14 +13,17 @@ type BoardState struct {
 	NextNum int   // Next number to place
 }
 
-type Board [5][6]int
+type Board [9][15]int
 
 func main() {
+	startTime := time.Now()
 	board := Board{}
 
 	//initialize 1's on the board
-	board[1][2] = 1
-	board[3][4] = 1
+	board[2][3] = 1
+	board[4][7] = 1
+	board[4][12] = 1
+	board[6][9] = 1
 
 	next_num := 2
 	boardStates := make([]BoardState, 0)
@@ -45,6 +51,9 @@ func main() {
 		i++
 	}
 
+	elapsed := time.Since(startTime)
+	fmt.Printf("Excution took %s\n", elapsed)
+
 	fmt.Println("Total Board States:", len(boardStates))
 	fmt.Println("Highest Num:", highest_num)
 	fmt.Println("Highest Board State")
@@ -66,7 +75,7 @@ func PlayBoardState(boardState *BoardState, boardStateList *[]BoardState) (int, 
 	startingX := boardState.NextX
 	startingY := boardState.NextY
 
-	for next_num < 17 {
+	for {
 		for y := startingY; y < len(board) && !placed_tile; y++ {
 			for x := startingX; x < len(board[y]) && !placed_tile; x++ {
 				if board[y][x] == 0 {
